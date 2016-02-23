@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 #define PI 3.14159265358979323846
 
@@ -19,14 +20,23 @@ struct UnitVector {
   float longitude;
 };
 
+struct Bin {
+  int offset;
+  float phi;
+};
+
 
 // arg[1]: number of bins to generate
 // arg[2]: number of points to generate
 // arg[3]: seed (optional)
 int main(int argc, char **argv) {
+
+  const double PHI = ((sqrt(5) - 1) / 2);
+  const double GA = PHI * 2.0 * PI;
+  
   bool debug = true;
   int numBins = 10000;
-  int numPoints = 10000000;
+  int numPoints = 10000;
   time_t seed;
   if (debug) {
     seed = 123456789;
@@ -83,7 +93,7 @@ int main(int argc, char **argv) {
       p->z = z / mag;
       p->theta = acos(p->z);
       p->phi = atan2(p->y, p->x);
-      p->latitude = (p->theta * 180.0 / PI) - 90.0;
+      p->latitude = (p->theta * 180.0 / PI) - 90.0; // TODO: do i need this - 90
       p->longitude = p->phi * 180.0 / PI;
       // printf("\n");
       // printf("Point %d:\n", pointCounter);
@@ -99,8 +109,52 @@ int main(int argc, char **argv) {
     }
   }
 
+  float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
+  int circumference = ceil(2.0 * PI * radius);
+  printf("radius %f\n", radius);
+  printf("circumference %d\n", circumference);
 
 
+
+  // generate structure
+  //*
+  Bin **maps; 
+  maps = (Bin **) calloc(circumference, sizeof(Bin *));
+  if (maps == NULL) {
+    printf("Error allocating memory for the maps\n");
+    return 1;
+  }
+  maps[0] = (Bin *) malloc(circumference * sizeof(Bin));
+  if (maps[0] == NULL) {
+    printf("Error allocating memory for map with circumference %d\n", circumference);
+    return 1;
+  }
+  Bin *map = maps[0];
+  Bin *bin = NULL;
+  int binCounter;
+  for (binCounter = 0; binCounter < circumference; binCounter++) {
+    bin = &map[binCounter];
+    bin->phi = fmod(GA * binCounter, PI * 2.0); // [-PI/2, PI/2]
+    bin->offset = binCounter;
+    printf("%f\n", bin->phi);
+  }
+  // for loop top copy secton of data down
+  int mapCounter;
+  for (mapCounter = 1; mapCounter < circumference; mapCounter++) {
+    maps[mapCounter] = (Bin *) malloc((circumference - mapCounter) * sizeof(Bin));
+    if (maps[mapCounter] == NULL) {
+      printf("Error allocating memory for map with circumference %d\n", circumference - mapCounter);
+      return 1;
+    }
+    memcpy(maps[mapCounter], maps[mapCounter - 1], (circumference - mapCounter) * sizeof(Bin));
+  }
+  // SORT EACH ARRAY
+
+  // Clean Up
+  for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
+    free(maps[mapCounter]);
+  }
+  free(maps);
   free(points);
   return 0;
 }
