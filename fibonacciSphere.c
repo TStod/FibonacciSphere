@@ -5,11 +5,6 @@
 #include <string.h>
 
 #define PI 3.14159265358979323846
-
-float randomFloat();
-float randomFloatMax(float max);
-float randomFloatMinMax(float min, float max);
-
 struct UnitVector {
   float x;
   float y;
@@ -25,6 +20,13 @@ struct Bin {
   float phi;
 };
 
+
+// Declare Functions
+float randomFloat();
+float randomFloatMax(float max);
+float randomFloatMinMax(float min, float max);
+void merge(Bin *merged, Bin *left, int leftCount, Bin *right, int rightCount);
+void mergeSort(Bin *array, int length);
 
 // arg[1]: number of bins to generate
 // arg[2]: number of points to generate
@@ -116,12 +118,12 @@ int main(int argc, char **argv) {
 
 
 
-  // generate structure
-  //*
+  // Generate Unsorted Maps
   Bin **maps; 
   maps = (Bin **) calloc(circumference, sizeof(Bin *));
   if (maps == NULL) {
     printf("Error allocating memory for the maps\n");
+    // free(points);
     return 1;
   }
   maps[0] = (Bin *) malloc(circumference * sizeof(Bin));
@@ -136,9 +138,7 @@ int main(int argc, char **argv) {
     bin = &map[binCounter];
     bin->phi = fmod(GA * binCounter, PI * 2.0); // [-PI/2, PI/2]
     bin->offset = binCounter;
-    printf("%f\n", bin->phi);
   }
-  // for loop top copy secton of data down
   int mapCounter;
   for (mapCounter = 1; mapCounter < circumference; mapCounter++) {
     maps[mapCounter] = (Bin *) malloc((circumference - mapCounter) * sizeof(Bin));
@@ -148,7 +148,18 @@ int main(int argc, char **argv) {
     }
     memcpy(maps[mapCounter], maps[mapCounter - 1], (circumference - mapCounter) * sizeof(Bin));
   }
-  // SORT EACH ARRAY
+  
+  // Sort Maps
+  mergeSort(maps[0], circumference);
+  for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
+    mergeSort(maps[mapCounter], circumference - mapCounter);
+    // printf("\n");
+    // for (binCounter = 0; binCounter < circumference - mapCounter; binCounter++) {
+      // printf("Index: %d\n", binCounter);
+      // printf("offset: %d\n", maps[mapCounter][binCounter].offset);
+    //   printf("phi: %f\n", maps[mapCounter][binCounter].phi);
+    // }
+  }
 
   // Clean Up
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
@@ -170,3 +181,53 @@ float randomFloatMax(float max) {
 float randomFloatMinMax(float min, float max) {
   return randomFloatMax(max - min) + min;
 };
+
+// Merged Sort Adapted From:
+// https://gist.github.com/mycodeschool/9678029#file-mergesort_c-c-L25
+
+void merge(Bin *merged, Bin *left, int leftCount, Bin *right, int rightCount) {
+  int leftIndex = 0;
+  int rightIndex = 0;
+  int mergedIndex = 0;
+
+  while ((leftIndex < leftCount) && (rightIndex < rightCount)) {
+    if (left[leftIndex].phi > right[rightIndex].phi) { // > ascending, < descending
+      memcpy(&merged[mergedIndex++], &right[rightIndex++], sizeof(Bin));
+    }
+    else {
+      memcpy(&merged[mergedIndex++], &left[leftIndex++], sizeof(Bin));
+    }
+  }
+  while (leftIndex < leftCount) {
+    memcpy(&merged[mergedIndex++], &left[leftIndex++], sizeof(Bin));
+  }
+  while (rightIndex < rightCount) {
+    memcpy(&merged[mergedIndex++], &right[rightIndex++], sizeof(Bin));
+  }
+}
+
+void mergeSort(Bin *array, int length) {
+  int mid;
+  int i;
+  Bin *left;
+  Bin *right;
+  if (length < 2) {
+    return;
+  }
+
+  mid = length / 2;
+
+  left = (Bin*) malloc(mid * sizeof(Bin));
+  right = (Bin*) malloc((length - mid) * sizeof(Bin)); 
+  // TODO: check to make sure allocation worked?
+  
+  memcpy(left, array, mid * sizeof(Bin));
+  memcpy(right, &array[mid], (length - mid) * sizeof(Bin));
+  
+  mergeSort(left, mid);
+  mergeSort(right, length - mid);
+  merge(array, left, mid, right, length - mid);
+
+  free(left);
+  free(right);
+}
