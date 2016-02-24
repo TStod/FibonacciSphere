@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
 
   
   bool debug = true;
-  int numBins = 10000;
-  int numPoints = 10000;
+  int numBins = 100000;
+  int numPoints = 10000000;
   time_t seed;
   if (debug) {
     // seed = 1456283917;
@@ -99,13 +99,6 @@ int main(int argc, char **argv) {
       p->y = y / mag;
       p->z = z / mag;
       generateUnitVectorFromCartesian(p);
-      // printf("Point %d:\n", pointCounter);
-      // printf("x: %f\n", p->x);
-      // printf("y: %f\n", p->y);
-      // printf("z: %f\n", p->z);
-      // printf("theta: %f\n", p->theta);
-      // printf("phi: %f\n", p->phi);
-      // printf("\n");
       pointCounter++;
     }
   }
@@ -150,12 +143,6 @@ int main(int argc, char **argv) {
   mergeSort(maps[0], circumference);
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     mergeSort(maps[mapCounter], circumference - mapCounter);
-    // printf("\n");
-    // for (binCounter = 0; binCounter < circumference - mapCounter; binCounter++) {
-      // printf("Index: %d\n", binCounter);
-      // printf("offset: %d\n", maps[mapCounter][binCounter].offset);
-      // printf("theta: %f\n", maps[mapCounter][binCounter].theta);
-    // }
   }
 
   // Bin Points
@@ -183,121 +170,48 @@ int main(int argc, char **argv) {
     upperThetaOffset = (2 * PI) - lowerThetaOffset;
   }
 
-  printf("\n");
-  printf("Guess Index: %d\n", guessIndex);
+  int numPotentials = 4;
+  int *potentials = (int*) malloc(numPotentials * sizeof(int));
+  potentials[0] = getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
+  potentials[1] = getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
+  potentials[2] = getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
+  potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
   
-  printf("\n");
-  printf("p.x:     %f\n", p->x);
-  printf("p.y:     %f\n", p->y);
-  printf("p.z:     %f\n", p->z);
-  printf("p.phi:   %f\n", p->phi);
-  printf("p.theta: %f\n", p->theta);
-  printf("\n");
-  printf("guess.x:     %f\n", guess.x);
-  printf("guess.y:     %f\n", guess.y);
-  printf("guess.z:     %f\n", guess.z);
-  printf("guess.phi:   %f\n", guess.phi);
-  printf("guess.theta: %f\n", guess.theta);
-  printf("\n");
-  printf("%f\n", p->theta);
-  printf("%f\n", guess.theta);
-  printf("\n");
-  printf("%f\n", lowerThetaOffset);
-  printf("%f\n", upperThetaOffset);
-
-  int lowerAfter = guessIndex - getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
-  int lowerBefore = guessIndex - getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
-  int upperBefore = guessIndex + getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
-  int upperAfter = guessIndex + getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
-
-  printf("\n");
-  printf("%d\n", getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset));
-  printf("%d\n", getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset));
-  printf("%d\n", getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset));
-  printf("%d\n", getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset));
-  printf("\n");
-  printf("%d\n", lowerAfter);
-  printf("%d\n", lowerBefore);
-  printf("%d\n", upperBefore);
-  printf("%d\n", upperAfter);
-  
-  printf("\n");
-  for (binCounter = 0; binCounter < circumference - mapIndex; binCounter++) {
-    printf("Index: %d\n", binCounter);
-    printf("offset: %d\n", maps[mapIndex][binCounter].offset);
-    printf("theta: %f\n", maps[mapIndex][binCounter].theta);
-  }
-
   int bestPointIndex;
   float bestDistance;
   float testDistance;
   UnitVector testPoint;
   bool found = false;
+  int guessCounter;
+  for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
+    if (0 <= potentials[guessCounter]) {
+      potentials[guessCounter] *= pow(-1, (guessCounter / 2) + 1);
+      potentials[guessCounter] += guessIndex;
+      if ((0 <= potentials[guessCounter]) && (potentials[guessCounter] < numBins)) {
+        generateUnitVectorFromIndex(&testPoint, potentials[guessCounter], numBins);
+        if (!found) {
+          bestPointIndex = potentials[guessCounter];
+          bestDistance = distanceBetween(&testPoint, p);
+          found = true;
+        }
+        else {
+          testDistance = distanceBetween(&testPoint, p);
+          if (testDistance < bestDistance) {
+            bestPointIndex = potentials[guessCounter];
+            bestDistance = testDistance;
+          }
+        }
+      }
+    }
+  }
 
-  if ((lowerAfter <= guessIndex) && (0 <= lowerAfter)) {
-    generateUnitVectorFromIndex(&testPoint, lowerAfter, numBins);
-    if (!found) {
-      bestPointIndex = lowerAfter;
-      bestDistance = distanceBetween(&testPoint, p);
-    }
-    else {
-      testDistance = distanceBetween(&testPoint, p);
-      if (testDistance < bestDistance) {
-        bestDistance = testDistance;
-        bestPointIndex = lowerAfter;
-      }
-    }
-    found = true;
-  }
-  if ((lowerBefore <= guessIndex) && (0 <= lowerBefore)) {
-    generateUnitVectorFromIndex(&testPoint, lowerBefore, numBins);
-    if (!found) {
-      bestPointIndex = lowerBefore;
-      bestDistance = distanceBetween(&testPoint, p);
-    }
-    else {
-      testDistance = distanceBetween(&testPoint, p);
-      if (testDistance < bestDistance) {
-        bestDistance = testDistance;
-        bestPointIndex = lowerBefore;
-      }
-    }
-    found = true;
-  }
-  if ((upperBefore >= guessIndex) && (numBins > upperBefore)) {
-    generateUnitVectorFromIndex(&testPoint, upperBefore, numBins);
-    if (!found) {
-      bestPointIndex = upperBefore;
-      bestDistance = distanceBetween(&testPoint, p);
-    }
-    else {
-      testDistance = distanceBetween(&testPoint, p);
-      if (testDistance < bestDistance) {
-        bestDistance = testDistance;
-        bestPointIndex = upperBefore;
-      }
-    }
-    found = true;
-  }
-  if ((upperAfter >= guessIndex) && (numBins > upperAfter)) {
-    generateUnitVectorFromIndex(&testPoint, upperAfter, numBins);
-    if (!found) {
-      bestPointIndex = upperAfter;
-      bestDistance = distanceBetween(&testPoint, p);
-    }
-    else {
-      testDistance = distanceBetween(&testPoint, p);
-      if (testDistance < bestDistance) {
-        bestDistance = testDistance;
-        bestPointIndex = upperAfter;
-      }
-    }
-    found = true;
-  }
+  printf("\n");
+  printf("Guess Index: %d\n", guessIndex);
   printf("Best: %d\n", bestPointIndex);
   printf("Best Distance: %f\n", bestDistance);
 
   // Clean Up
+  free(potentials);
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     free(maps[mapCounter]);
   }
@@ -365,16 +279,6 @@ void generateUnitVectorFromSpherical(UnitVector *p) {
 
 float distanceBetween(UnitVector *p1, UnitVector *p2) {
   float distance = 0;
-  printf("\n");
-  printf("x1: %f\n", p1->x);
-  printf("x2: %f\n", p2->x);
-  printf("xDiff: %f\n", p1->x - p2->x);
-  printf("y1: %f\n", p1->y);
-  printf("y2: %f\n", p2->y);
-  printf("yDiff: %f\n", p1->y - p2->y);
-  printf("z1: %f\n", p1->z);
-  printf("z2: %f\n", p2->z);
-  printf("zDiff: %f\n", p1->z - p2->z);
   distance += pow(p1->x - p2->x, 2);
   distance += pow(p1->y - p2->y, 2);
   distance += pow(p1->z - p2->z, 2);
