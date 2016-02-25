@@ -40,15 +40,13 @@ float distanceBetween(UnitVector *p1, UnitVector *p2);
 // arg[2]: number of points to generate
 // arg[3]: seed (optional)
 int main(int argc, char **argv) {
-
-  
   bool debug = false;
+
   int numBins = 100000;
-  int numPoints = 10000000;
-  time_t seed;
+  int numPoints = 1000000;
+  time_t seed = time(NULL);
   if (debug) {
-    seed = 1456358170;
-    seed = time(NULL);
+    seed = 123456789;
   }
   else {
     if ((argc > 4) || (3 > argc)) {
@@ -60,9 +58,6 @@ int main(int argc, char **argv) {
     if (3 < argc) {
       seed = atoi(argv[3]);
     }
-    else {
-      seed = time(NULL);
-    }
   }
 
 
@@ -71,21 +66,23 @@ int main(int argc, char **argv) {
   printf("Seed: %d\n", seed);
   srand(seed);
 
+  clock_t startGenPoints;
+  clock_t endGenPoints;
+  startGenPoints = clock();
+
   UnitVector *points;
   points = (UnitVector *) malloc(numPoints * sizeof(UnitVector));
   if (points == NULL) {
     printf("Error allocating memory for the array of points\n");
     return 1;
   }
-  else {
-    printf("Memory allocated for the array of points\n");
-  }
 
   float x;
   float y;
   float z;
   float mag;
-  
+
+  // Generate Points
   UnitVector *p = NULL;
   int pointCounter = 0;
   while (pointCounter < numPoints) {
@@ -103,18 +100,20 @@ int main(int argc, char **argv) {
     }
   }
 
+  endGenPoints = clock();
+  clock_t startGenMaps;
+  clock_t endGenMaps;
+  startGenMaps = clock();
+
   float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
   float exactCircumference = 2.0 * PI * radius;
   int circumference = ceil(exactCircumference);
-  printf("radius %f\n", radius);
-  printf("circumference %d\n", circumference);
 
   // Generate Unsorted Maps
   Bin **maps; 
   maps = (Bin **) calloc(circumference, sizeof(Bin *));
   if (maps == NULL) {
     printf("Error allocating memory for the maps\n");
-    // free(points);
     return 1;
   }
   maps[0] = (Bin *) malloc(circumference * sizeof(Bin));
@@ -145,6 +144,11 @@ int main(int argc, char **argv) {
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     mergeSort(maps[mapCounter], circumference - mapCounter);
   }
+
+  endGenMaps = clock();
+  clock_t startBinPoints;
+  clock_t endBinPoints;
+  startBinPoints = clock();
 
   // Bin Points
   int *results = (int *) calloc(numBins, sizeof(int));
@@ -224,10 +228,19 @@ int main(int argc, char **argv) {
     }
   }
 
-  printf("Results:\n");
-  for (binCounter = 0; binCounter < numBins; binCounter++) {
-    printf("%d: %d\n", binCounter, results[binCounter]);
-  }
+  endBinPoints = clock();
+
+  printf("\n");
+  printf("Timing:\n");
+  printf("Point Generation: %f\n", (double)(endGenPoints - startGenPoints) / CLOCKS_PER_SEC);
+  printf("Map Generation: %f\n", (double)(endGenMaps - startGenMaps) / CLOCKS_PER_SEC);
+  printf("Point Binning: %f\n", (double)(endBinPoints - startBinPoints) / CLOCKS_PER_SEC);
+
+  // printf("\n");
+  // printf("Results:\n");
+  // for (binCounter = 0; binCounter < numBins; binCounter++) {
+  //   printf("%d: %d\n", binCounter, results[binCounter]);
+  // }
 
   // Clean Up
   free(potentials);
