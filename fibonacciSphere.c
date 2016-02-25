@@ -42,12 +42,12 @@ float distanceBetween(UnitVector *p1, UnitVector *p2);
 int main(int argc, char **argv) {
 
   
-  bool debug = true;
+  bool debug = false;
   int numBins = 100000;
   int numPoints = 10000000;
   time_t seed;
   if (debug) {
-    // seed = 1456283917;
+    seed = 1456358170;
     seed = time(NULL);
   }
   else {
@@ -104,7 +104,8 @@ int main(int argc, char **argv) {
   }
 
   float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
-  int circumference = ceil(2.0 * PI * radius);
+  float exactCircumference = 2.0 * PI * radius;
+  int circumference = ceil(exactCircumference);
   printf("radius %f\n", radius);
   printf("circumference %d\n", circumference);
 
@@ -146,45 +147,57 @@ int main(int argc, char **argv) {
   }
 
   // Bin Points
+  int *results = (int *) calloc(numBins, sizeof(int));
+  if (results == NULL) {
+    printf("Error allocating memory for results\n");
+    return 1;
+  }
   int localCircumference;
   int mapIndex;
   float upperThetaOffset; 
   float lowerThetaOffset;
-
   int guessIndex;
   UnitVector guess;
-  
-  p = &points[0];
-
-  guessIndex = floor(numBins * (p->z + 1) / 2);
-  generateUnitVectorFromIndex(&guess, guessIndex, numBins);
-  localCircumference = ceil(circumference * sqrt(pow(p->x, 2) + pow(p->y, 2)));
-  mapIndex = circumference - localCircumference;
-
-  if (guess.theta < p->theta) {
-    upperThetaOffset = p->theta - guess.theta;
-    lowerThetaOffset = (2 * PI) - upperThetaOffset;
-  }
-  else {
-    lowerThetaOffset = guess.theta - p->theta;
-    upperThetaOffset = (2 * PI) - lowerThetaOffset;
-  }
-
   int numPotentials = 4;
   int *potentials = (int*) malloc(numPotentials * sizeof(int));
-  potentials[0] = getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
-  potentials[1] = getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
-  potentials[2] = getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
-  potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
-  
+  if (potentials == NULL) {
+    printf("Error allocating memory for potentials\n");
+    return 1;
+  }
   int bestPointIndex;
   float bestDistance;
   float testDistance;
   UnitVector testPoint;
-  bool found = false;
+  bool found;
   int guessCounter;
-  for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
-    if (0 <= potentials[guessCounter]) {
+  int badPoints = 0;
+
+  for (pointCounter = 241; pointCounter < numPoints; pointCounter++) {
+    p = &points[pointCounter];
+    guessIndex = floor(numBins * (p->z + 1) / 2);
+    generateUnitVectorFromIndex(&guess, guessIndex, numBins);
+    localCircumference = ceil(exactCircumference * sqrt(pow(p->x, 2) + pow(p->y, 2)));
+    if (localCircumference > circumference) {
+      localCircumference = circumference;
+    }
+    mapIndex = circumference - localCircumference;
+
+    if (guess.theta < p->theta) {
+      upperThetaOffset = p->theta - guess.theta;
+      lowerThetaOffset = (2 * PI) - upperThetaOffset;
+    }
+    else {
+      lowerThetaOffset = guess.theta - p->theta;
+      upperThetaOffset = (2 * PI) - lowerThetaOffset;
+    }
+
+    potentials[0] = getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
+    potentials[1] = getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
+    potentials[2] = getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
+    potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
+    
+    found = false;
+    for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
       potentials[guessCounter] *= pow(-1, (guessCounter / 2) + 1);
       potentials[guessCounter] += guessIndex;
       if ((0 <= potentials[guessCounter]) && (potentials[guessCounter] < numBins)) {
@@ -203,15 +216,22 @@ int main(int argc, char **argv) {
         }
       }
     }
+    if (found) {
+      results[bestPointIndex]++;
+    }
+    else {
+      badPoints++;
+    }
   }
 
-  printf("\n");
-  printf("Guess Index: %d\n", guessIndex);
-  printf("Best: %d\n", bestPointIndex);
-  printf("Best Distance: %f\n", bestDistance);
+  printf("Results:\n");
+  for (binCounter = 0; binCounter < numBins; binCounter++) {
+    printf("%d: %d\n", binCounter, results[binCounter]);
+  }
 
   // Clean Up
   free(potentials);
+  free(results);
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     free(maps[mapCounter]);
   }
@@ -240,7 +260,7 @@ int getOffsetAfter(Bin *map, int length, float theta) {
       return map[binCounter].offset;
     }
   }
-  return offset;
+  return map[0].offset;
 }
 
 int getOffsetBefore(Bin *map, int length, float theta) {
@@ -251,7 +271,7 @@ int getOffsetBefore(Bin *map, int length, float theta) {
       return map[binCounter].offset;
     }
   }
-  return offset;
+  return map[length - 1].offset;
 }
 
 // will overwrite the unit vector at p
