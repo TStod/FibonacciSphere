@@ -1,9 +1,11 @@
 # FibonacciSphere
 My project for High Performance Computing at Northeastern University
 
-Complied with gcc
+Complied with gcc on my local machine
 
-If compiling with debug flag only hardcoded parameters will be used (bins, points, seed)
+Compiled with g++ on the Discovery Cluster
+
+If compiling with debug flag only hard coded parameters will be used (bins, points, seed)
 
 Command line arguments:
 ```
