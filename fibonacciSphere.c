@@ -140,7 +140,6 @@ int main(int argc, char **argv) {
   }
   
   // Sort Maps
-  mergeSort(maps[0], circumference);
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     mergeSort(maps[mapCounter], circumference - mapCounter);
   }
@@ -176,7 +175,7 @@ int main(int argc, char **argv) {
   int guessCounter;
   int badPoints = 0;
 
-  for (pointCounter = 241; pointCounter < numPoints; pointCounter++) {
+  for (pointCounter = 0; pointCounter < numPoints; pointCounter++) {
     p = &points[pointCounter];
     guessIndex = floor(numBins * (p->z + 1) / 2);
     generateUnitVectorFromIndex(&guess, guessIndex, numBins);

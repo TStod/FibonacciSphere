@@ -42,7 +42,7 @@ float distanceBetween(UnitVector *p1, UnitVector *p2);
 // arg[3]: seed (optional)
 int main(int argc, char **argv) {
   bool debug = false;
-
+  int numThreads = 4;
   int numBins = 100000;
   int numPoints = 1000000;
   time_t seed = time(NULL);
@@ -50,14 +50,17 @@ int main(int argc, char **argv) {
     seed = 123456789;
   }
   else {
-    if ((argc > 4) || (3 > argc)) {
-      printf("Need 2 or 3 arguments:\nBins\nPoints\nSeed (optional)\n");
+    if ((argc > 5) || (3 > argc)) {
+      printf("Need 2, 3, or 4 arguments:\nBins\nPoints\nThreads (optional)\nSeed (optional)\n");
       return 1;
     }
     numBins = atoi(argv[1]);
     numPoints = atoi(argv[2]);
     if (3 < argc) {
-      seed = atoi(argv[3]);
+      numThreads = atoi(argv[3]);
+    }
+    if (4 < argc) {
+      seed = atoi(argv[4]);
     }
   }
 
@@ -65,11 +68,13 @@ int main(int argc, char **argv) {
   printf("Bins: %d\n", numBins);
   printf("Points: %d\n", numPoints);
   printf("Seed: %d\n", seed);
+  printf("Number of Threads: %i\n", numThreads);
   srand(seed);
+  omp_set_num_threads(numThreads);
 
-  clock_t startGenPoints;
-  clock_t endGenPoints;
-  startGenPoints = clock();
+  double startGenPoints;
+  double endGenPoints;
+  startGenPoints = omp_get_wtime();
 
   UnitVector *points;
   points = (UnitVector *) malloc(numPoints * sizeof(UnitVector));
@@ -101,10 +106,10 @@ int main(int argc, char **argv) {
     }
   }
 
-  endGenPoints = clock();
-  clock_t startGenMaps;
-  clock_t endGenMaps;
-  startGenMaps = clock();
+  endGenPoints = omp_get_wtime();
+  double startGenMaps;
+  double endGenMaps;
+  startGenMaps = omp_get_wtime();
 
   float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
   float exactCircumference = 2.0 * PI * radius;
@@ -141,15 +146,18 @@ int main(int argc, char **argv) {
   }
   
   // Sort Maps
-  mergeSort(maps[0], circumference);
-  for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
-    mergeSort(maps[mapCounter], circumference - mapCounter);
+  #pragma omp parallel num_threads(numThreads)
+  {
+    #pragma omp for
+    for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
+      mergeSort(maps[mapCounter], circumference - mapCounter);
+    }
   }
 
-  endGenMaps = clock();
-  clock_t startBinPoints;
-  clock_t endBinPoints;
-  startBinPoints = clock();
+  endGenMaps = omp_get_wtime();
+  double startBinPoints;
+  double endBinPoints;
+  startBinPoints = omp_get_wtime();
 
   // Bin Points
   int *results = (int *) calloc(numBins, sizeof(int));
@@ -157,85 +165,95 @@ int main(int argc, char **argv) {
     printf("Error allocating memory for results\n");
     return 1;
   }
-  int localCircumference;
-  int mapIndex;
-  float upperThetaOffset; 
-  float lowerThetaOffset;
-  int guessIndex;
-  UnitVector guess;
   int numPotentials = 4;
-  int *potentials = (int*) malloc(numPotentials * sizeof(int));
-  if (potentials == NULL) {
-    printf("Error allocating memory for potentials\n");
-    return 1;
-  }
-  int bestPointIndex;
-  float bestDistance;
-  float testDistance;
-  UnitVector testPoint;
-  bool found;
-  int guessCounter;
   int badPoints = 0;
 
-  for (pointCounter = 241; pointCounter < numPoints; pointCounter++) {
-    p = &points[pointCounter];
-    guessIndex = floor(numBins * (p->z + 1) / 2);
-    generateUnitVectorFromIndex(&guess, guessIndex, numBins);
-    localCircumference = ceil(exactCircumference * sqrt(pow(p->x, 2) + pow(p->y, 2)));
-    if (localCircumference > circumference) {
-      localCircumference = circumference;
+  #pragma omp parallel num_threads(numThreads)
+  {
+    int localCircumference;
+    int mapIndex;
+    float upperThetaOffset; 
+    float lowerThetaOffset;
+    int guessIndex;
+    UnitVector guess;
+    int bestPointIndex;
+    float bestDistance;
+    float testDistance;
+    UnitVector testPoint;
+    bool found;
+    int guessCounter;
+    int *potentials = (int*) malloc(numPotentials * sizeof(int));
+    if (potentials == NULL) {
+      printf("Error allocating memory for potentials\n");
     }
-    mapIndex = circumference - localCircumference;
+    #pragma omp for reduction (+ : badPoints)
+    for (pointCounter = 0; pointCounter < numPoints; pointCounter++) {
+      p = &points[pointCounter];
+      guessIndex = floor(numBins * (p->z + 1) / 2);
+      generateUnitVectorFromIndex(&guess, guessIndex, numBins);
+      localCircumference = ceil(exactCircumference * sqrt(pow(p->x, 2) + pow(p->y, 2)));
+      if (localCircumference > circumference) {
+        localCircumference = circumference;
+      }
+      mapIndex = circumference - localCircumference;
 
-    if (guess.theta < p->theta) {
-      upperThetaOffset = p->theta - guess.theta;
-      lowerThetaOffset = (2 * PI) - upperThetaOffset;
-    }
-    else {
-      lowerThetaOffset = guess.theta - p->theta;
-      upperThetaOffset = (2 * PI) - lowerThetaOffset;
-    }
+      if (guess.theta < p->theta) {
+        upperThetaOffset = p->theta - guess.theta;
+        lowerThetaOffset = (2 * PI) - upperThetaOffset;
+      }
+      else {
+        lowerThetaOffset = guess.theta - p->theta;
+        upperThetaOffset = (2 * PI) - lowerThetaOffset;
+      }
 
-    potentials[0] = getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
-    potentials[1] = getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
-    potentials[2] = getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
-    potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
-    
-    found = false;
-    for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
-      potentials[guessCounter] *= pow(-1, (guessCounter / 2) + 1);
-      potentials[guessCounter] += guessIndex;
-      if ((0 <= potentials[guessCounter]) && (potentials[guessCounter] < numBins)) {
-        generateUnitVectorFromIndex(&testPoint, potentials[guessCounter], numBins);
-        if (!found) {
-          bestPointIndex = potentials[guessCounter];
-          bestDistance = distanceBetween(&testPoint, p);
-          found = true;
-        }
-        else {
-          testDistance = distanceBetween(&testPoint, p);
-          if (testDistance < bestDistance) {
+      potentials[0] = getOffsetAfter(maps[mapIndex], localCircumference, lowerThetaOffset);
+      potentials[1] = getOffsetBefore(maps[mapIndex], localCircumference, lowerThetaOffset);
+      potentials[2] = getOffsetBefore(maps[mapIndex], localCircumference, upperThetaOffset);
+      potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
+      
+      found = false;
+      for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
+        potentials[guessCounter] *= pow(-1, (guessCounter / 2) + 1);
+        potentials[guessCounter] += guessIndex;
+        if ((0 <= potentials[guessCounter]) && (potentials[guessCounter] < numBins)) {
+          generateUnitVectorFromIndex(&testPoint, potentials[guessCounter], numBins);
+          if (!found) {
             bestPointIndex = potentials[guessCounter];
-            bestDistance = testDistance;
+            bestDistance = distanceBetween(&testPoint, p);
+            found = true;
+          }
+          else {
+            testDistance = distanceBetween(&testPoint, p);
+            if (testDistance < bestDistance) {
+              bestPointIndex = potentials[guessCounter];
+              bestDistance = testDistance;
+            }
           }
         }
       }
+      if (found) {
+        #pragma omp atomic
+        results[bestPointIndex]++;
+      }
+      else {
+        badPoints++;
+      }
     }
-    if (found) {
-      results[bestPointIndex]++;
-    }
-    else {
-      badPoints++;
-    }
+    free(potentials);
   }
 
-  endBinPoints = clock();
+  endBinPoints = omp_get_wtime();
+
+  if (badPoints > 0) {
+    printf("\n");
+    printf("Bad Points:%d\n", badPoints);
+  }
 
   printf("\n");
   printf("Timing:\n");
-  printf("Point Generation: %f\n", (double)(endGenPoints - startGenPoints) / CLOCKS_PER_SEC);
-  printf("Map Generation: %f\n", (double)(endGenMaps - startGenMaps) / CLOCKS_PER_SEC);
-  printf("Point Binning: %f\n", (double)(endBinPoints - startBinPoints) / CLOCKS_PER_SEC);
+  printf("Point Generation: %f\n", (double)(endGenPoints - startGenPoints));
+  printf("Map Generation: %f\n", (double)(endGenMaps - startGenMaps));
+  printf("Point Binning: %f\n", (double)(endBinPoints - startBinPoints));
 
   // printf("\n");
   // printf("Results:\n");
@@ -244,7 +262,6 @@ int main(int argc, char **argv) {
   // }
 
   // Clean Up
-  free(potentials);
   free(results);
   for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     free(maps[mapCounter]);

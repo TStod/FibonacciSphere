@@ -1,5 +1,5 @@
 #!/bin/sh
-#BSUB -J Teddy-8c
+#BSUB -J Teddy-Serial
 #BSUB -o project_output_file
 #BSUB -e project_error_file
 #BSUB -n 1
