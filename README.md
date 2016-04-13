@@ -26,3 +26,18 @@ arg[2]: number of threads
 arg[3]: number of points to generate
 arg[4]: seed (optional)
 ```
+
+MPI
+
+Compiled with mpiCC on the Discovery Cluster
+```
+mpiCC -o bin/fibonacciSphereMPI fibonacciSphereMPI.c
+```
+
+Command line arguments:
+```
+arg[1]: number of bins to generate
+arg[2]: number of points to generate
+arg[3]: seed (optional)
+```
+
