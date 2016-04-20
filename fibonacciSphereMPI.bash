@@ -2,7 +2,7 @@
 #BSUB -J Teddy-MPI
 #BSUB -o project_output_file
 #BSUB -e project_error_file
-#BSUB -n 32
+#BSUB -n 8
 #BSUB -q ser-par-10g-3
 #BSUB cwd /home/stoddard.t/FibonacciSphere/
 #BSUB -R "span[ptile=4]"
@@ -16,12 +16,12 @@ declare -a hosts
 read -a hosts < ${tempfile1}
 for ((i=0; i<${#hosts[@]}; i += 2)) ;
 do
- HOST=${hosts[$i]}
- CORE=${hosts[(($i+1))]}
- echo $HOST:$CORE >> $tempfile2
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
 done
 
-mpirun -np 32 -prot -TCP -lsf ./bin/fibonacciSphereMPI 100 10000 123456789
+mpirun -np 8 -prot -TCP -lsf ./bin/fibonacciSphereMPI 1000000 10000000 123456789
 
 rm $work/$tempfile1
 rm $work/$tempfile2

@@ -9,5 +9,5 @@ work=/home/stoddard.t/FibonacciSphere/
 
 cd $work
 
-export OMP_NUM_THREADS=32
-bin/fibonacciSphereOpenMP 1000000 10000000 32 123456789
+export OMP_NUM_THREADS=4
+bin/fibonacciSphereOpenMP 1000000 10000000 4 123456789

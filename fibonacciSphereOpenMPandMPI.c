@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
     else {
       if ((argc > 5) || (3 > argc)) {
         printf("Need 2, 3, or 4 arguments:\nBins\nPoints\nThreads (optional)\nSeed (optional)\n");
+        printf("argc: %d\n", argc);
         return 1;
       }
       numBins = atoi(argv[1]);
@@ -143,7 +144,9 @@ int main(int argc, char **argv) {
 
   MPI_Bcast(&numBins, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&numThreads, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  // omp_set_num_threads(numThreads);
+
+  omp_set_dynamic(0);
+  omp_set_num_threads(numThreads);
 
   if (rank == 0) {
     startGenPoints = MPI_Wtime();
@@ -254,7 +257,6 @@ int main(int argc, char **argv) {
   }
   int numPotentials = 4;
   int badPoints = 0;
-
   #pragma omp parallel num_threads(numThreads)
   {
     int localCircumference;

@@ -1,0 +1,1436 @@
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638626: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <4*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 09:53:08 2016
+Results reported at Wed Apr 13 09:53:28 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 4
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=4]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=4
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 4 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 4 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               75.68 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 3
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 4
+Number of Threads: 4
+Seed: 123456789
+maxLocalNumPoints: 2500000
+Rank: 2 Bad Points:2
+
+Timing:
+Point Generation: 3.076336
+Map Generation: 0.019313
+Point Binning: 15.773040
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-131>
+Subject: Job 638629: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <4*compute-0-131>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 09:56:28 2016
+Results reported at Wed Apr 13 09:56:48 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 4
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=4]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=8
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 4 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 8 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               75.03 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.88 -- ranks 0 - 3
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 4
+Number of Threads: 8
+Seed: 123456789
+maxLocalNumPoints: 2500000
+Rank: 2 Bad Points:2
+
+Timing:
+Point Generation: 3.070703
+Map Generation: 0.019269
+Point Binning: 15.622730
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638631: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <4*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 09:59:04 2016
+Results reported at Wed Apr 13 09:59:23 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 4
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=4]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=16
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 4 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 16 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               75.09 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 3
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 4
+Number of Threads: 16
+Seed: 123456789
+maxLocalNumPoints: 2500000
+Rank: 2 Bad Points:2
+
+Timing:
+Point Generation: 3.076202
+Map Generation: 0.019283
+Point Binning: 15.636035
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638633: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <4*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:03:21 2016
+Results reported at Wed Apr 13 10:03:40 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 4
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=4]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=32
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 4 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 32 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               75.18 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 3
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 4
+Number of Threads: 32
+Seed: 123456789
+maxLocalNumPoints: 2500000
+Rank: 2 Bad Points:2
+
+Timing:
+Point Generation: 3.083346
+Map Generation: 0.019286
+Point Binning: 15.642625
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-131>
+Subject: Job 638635: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <8*compute-0-131>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:05:47 2016
+Results reported at Wed Apr 13 10:05:59 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 8
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=8]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=4
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 8 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 4 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               88.34 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.88 -- ranks 0 - 7
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 8
+Number of Threads: 4
+Seed: 123456789
+maxLocalNumPoints: 1250000
+Rank: 5 Bad Points:1
+Rank: 4 Bad Points:1
+
+Timing:
+Point Generation: 3.097789
+Map Generation: 0.031791
+Point Binning: 7.861547
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638637: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <8*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:07:41 2016
+Results reported at Wed Apr 13 10:07:52 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 8
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=8]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=8
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 8 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 8 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               88.25 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 7
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 8
+Number of Threads: 8
+Seed: 123456789
+maxLocalNumPoints: 1250000
+Rank: 4 Bad Points:1
+Rank: 5 Bad Points:1
+
+Timing:
+Point Generation: 3.091331
+Map Generation: 0.019277
+Point Binning: 7.849664
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-132>
+Subject: Job 638638: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <8*compute-0-132>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:09:15 2016
+Results reported at Wed Apr 13 10:09:53 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 8
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=8]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=16
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 8 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 16 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               88.06 sec.
+    Max Memory :             201 MB
+    Average Memory :         75.67 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               986 MB
+
+    Max Processes :          13
+    Max Threads :            14
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.89 -- ranks 0 - 7
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 8
+Number of Threads: 16
+Seed: 123456789
+maxLocalNumPoints: 1250000
+Rank: 4 Bad Points:1
+Rank: 5 Bad Points:1
+
+Timing:
+Point Generation: 3.085832
+Map Generation: 0.019280
+Point Binning: 7.836401
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-131>
+Subject: Job 638639: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <8*compute-0-131>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:11:34 2016
+Results reported at Wed Apr 13 10:11:45 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 8
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=8]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=32
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 8 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 32 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               88.11 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.88 -- ranks 0 - 7
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 8
+Number of Threads: 32
+Seed: 123456789
+maxLocalNumPoints: 1250000
+Rank: 4 Bad Points:1
+Rank: 5 Bad Points:1
+
+Timing:
+Point Generation: 3.088200
+Map Generation: 0.019480
+Point Binning: 7.830118
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638640: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <16*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:14:43 2016
+Results reported at Wed Apr 13 10:14:53 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 16
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=16]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=4
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 16 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 4 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               144.36 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 15
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 16
+Number of Threads: 4
+Seed: 123456789
+maxLocalNumPoints: 625000
+Rank: 8 Bad Points:1
+Rank: 10 Bad Points:1
+
+Timing:
+Point Generation: 4.063580
+Map Generation: 0.019816
+Point Binning: 4.836154
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-131>
+Subject: Job 638641: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <16*compute-0-131>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:16:02 2016
+Results reported at Wed Apr 13 10:16:14 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 16
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=16]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=8
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 16 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 8 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               156.61 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.88 -- ranks 0 - 15
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 16
+Number of Threads: 8
+Seed: 123456789
+maxLocalNumPoints: 625000
+Rank: 10 Bad Points:1
+Rank: 8 Bad Points:1
+
+Timing:
+Point Generation: 4.771090
+Map Generation: 0.031689
+Point Binning: 4.863095
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-132>
+Subject: Job 638642: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <16*compute-0-132>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:17:37 2016
+Results reported at Wed Apr 13 10:17:45 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 16
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=16]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=16
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 16 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 16 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               122.41 sec.
+    Max Memory :             13 MB
+    Average Memory :         13.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               56 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.89 -- ranks 0 - 15
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 16
+Number of Threads: 16
+Seed: 123456789
+maxLocalNumPoints: 625000
+Rank: 8 Bad Points:1
+Rank: 10 Bad Points:1
+
+Timing:
+Point Generation: 3.091441
+Map Generation: 0.019256
+Point Binning: 4.432815
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-134>
+Subject: Job 638643: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <16*compute-0-134>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:19:00 2016
+Results reported at Wed Apr 13 10:19:15 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 16
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=16]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=32
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 16 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 32 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               130.70 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.91 -- ranks 0 - 15
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 16
+Number of Threads: 32
+Seed: 123456789
+maxLocalNumPoints: 625000
+Rank: 10 Bad Points:1
+Rank: 8 Bad Points:1
+
+Timing:
+Point Generation: 3.088919
+Map Generation: 0.019783
+Point Binning: 4.951790
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638644: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <32*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:20:25 2016
+Results reported at Wed Apr 13 10:20:35 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 32
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=32]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=4
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 32 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 4 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               249.13 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 31
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 32
+Number of Threads: 4
+Seed: 123456789
+maxLocalNumPoints: 312500
+Rank: 20 Bad Points:1
+Rank: 17 Bad Points:1
+
+Timing:
+Point Generation: 4.757550
+Map Generation: 0.031946
+Point Binning: 3.352170
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-131>
+Subject: Job 638646: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <32*compute-0-131>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:21:48 2016
+Results reported at Wed Apr 13 10:21:55 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 32
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=32]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=8
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 32 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 8 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               202.49 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.88 -- ranks 0 - 31
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 32
+Number of Threads: 8
+Seed: 123456789
+maxLocalNumPoints: 312500
+Rank: 17 Bad Points:1
+Rank: 20 Bad Points:1
+
+Timing:
+Point Generation: 3.688927
+Map Generation: 0.031557
+Point Binning: 2.473670
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-132>
+Subject: Job 638647: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <32*compute-0-132>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:22:57 2016
+Results reported at Wed Apr 13 10:23:05 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 32
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=32]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=16
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 32 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 16 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               254.27 sec.
+    Max Memory :             13 MB
+    Average Memory :         13.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               56 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.89 -- ranks 0 - 31
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 32
+Number of Threads: 16
+Seed: 123456789
+maxLocalNumPoints: 312500
+Rank: 20 Bad Points:1
+Rank: 17 Bad Points:1
+
+Timing:
+Point Generation: 4.752702
+Map Generation: 0.033574
+Point Binning: 3.243815
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@compute-0-130>
+Subject: Job 638649: <Teddy-MPI> in cluster <mghpcc_cluster1> Done
+
+Job <Teddy-MPI> was submitted from host <discovery2> by user <stoddard.t> in cluster <mghpcc_cluster1>.
+Job was executed on host(s) <32*compute-0-130>, in queue <ser-par-10g-3>, as user <stoddard.t> in cluster <mghpcc_cluster1>.
+</home/stoddard.t> was used as the home directory.
+</home/stoddard.t/FibonacciSphere> was used as the working directory.
+Started at Wed Apr 13 10:24:42 2016
+Results reported at Wed Apr 13 10:24:56 2016
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+#BSUB -J Teddy-MPI
+#BSUB -o project_output_file
+#BSUB -e project_error_file
+#BSUB -n 32
+#BSUB -q ser-par-10g-3
+#BSUB cwd /home/stoddard.t/FibonacciSphere/
+#BSUB -R "span[ptile=32]"
+work=/home/stoddard.t/FibonacciSphere/
+
+cd $work
+tempfile1=hostlistrun
+tempfile2=hostlist-tcp
+echo $LSB_MCPU_HOSTS > $tempfile1
+declare -a hosts
+read -a hosts < ${tempfile1}
+for ((i=0; i<${#hosts[@]}; i += 2)) ;
+do
+  HOST=${hosts[$i]}
+  CORE=${hosts[(($i+1))]}
+  echo $HOST:$CORE >> $tempfile2
+done
+
+export OMP_NUM_THREADS=32
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+
+mpirun -np 32 -prot -TCP -lsf ./bin/fibonacciSphereOpenMPandMPI 1000000 10000000 32 123456789
+
+rm $work/$tempfile1
+rm $work/$tempfile2
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               248.53 sec.
+    Max Memory :             14 MB
+    Average Memory :         14.00 MB
+    Total Requested Memory : -
+    Delta Memory :           -
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Swap :               57 MB
+
+    Max Processes :          1
+    Max Threads :            1
+
+The output (if any) follows:
+
+Host 0 -- ip 10.100.9.87 -- ranks 0 - 31
+
+ host | 0
+======|======
+    0 : SHM
+
+ Prot -  All Intra-node communication is: SHM
+
+Bins: 1000000
+Points: 10000000
+Nodes: 32
+Number of Threads: 32
+Seed: 123456789
+maxLocalNumPoints: 312500
+Rank: 20 Bad Points:1
+Rank: 17 Bad Points:1
+
+Timing:
+Point Generation: 4.758883
+Map Generation: 0.031687
+Point Binning: 3.216380
+
+
+PS:
+
+Read file <project_error_file> for stderr output of this job.
+
