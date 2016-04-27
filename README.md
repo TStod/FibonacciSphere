@@ -22,8 +22,8 @@ Compiled with g++ on the Discovery Cluster
 Command line arguments:
 ```
 arg[1]: number of bins to generate
-arg[2]: number of threads
-arg[3]: number of points to generate
+arg[2]: number of points to generate
+arg[3]: number of threads
 arg[4]: seed (optional)
 ```
 
@@ -41,3 +41,17 @@ arg[2]: number of points to generate
 arg[3]: seed (optional)
 ```
 
+OpenNP and MPI
+
+Compiled with mpiCC on the Discovery Cluster
+```
+mpiCC -openmp fibonacciSphereOpenMPandMPI.c -o bin/fibonacciSphereOpenMPandMPI
+```
+
+Command line arguments:
+```
+arg[1]: number of bins to generate
+arg[2]: number of points to generate
+arg[3]: number of threads
+arg[4]: seed (optional)
+```

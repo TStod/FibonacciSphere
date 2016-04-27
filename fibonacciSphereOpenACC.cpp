@@ -1,11 +1,10 @@
-#include <stddef.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <sys/time.h>
 #include <string.h>
-#include <omp.h>
-#include "mpi.h"
+#include <openacc.h>
 
 #define PI 3.14159265358979323846
 const double PHI = ((sqrt(5) - 1) / 2); // not to be confused with phi
@@ -43,213 +42,125 @@ float distanceBetween(UnitVector *p1, UnitVector *p2);
 // arg[2]: number of points to generate
 // arg[3]: seed (optional)
 int main(int argc, char **argv) {
-  MPI_Status status;
-  int rank;
-  int size;
-
-  MPI_Init(&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  int numBins;
-  int numPoints;
-  int numThreads;
-  UnitVector *localPoints;
-  int localNumPoints;
-  Bin **maps;
-  int circumference;
-
-  double startGenPoints;
-  double endGenPoints;
-  double startGenMaps;
-  double endGenMaps;
-  double startBinPoints;
-  double endBinPoints;
-  
-  const int uvNumItems = 5;
-  int uvBlockLengths[5] = {
-    1,
-    1,
-    1,
-    1,
-    1
-  };
-  MPI_Datatype uvTypes[5] = {
-    MPI_FLOAT,
-    MPI_FLOAT,
-    MPI_FLOAT,
-    MPI_FLOAT,
-    MPI_FLOAT
-  };
-  MPI_Datatype MPI_UNIT_VECTOR;
-  MPI_Aint uvOffsets[5] = {
-    offsetof(UnitVector, x),
-    offsetof(UnitVector, y),
-    offsetof(UnitVector, z),
-    offsetof(UnitVector, theta),
-    offsetof(UnitVector, phi)
-  };
-  MPI_Type_create_struct(uvNumItems, uvBlockLengths, uvOffsets, uvTypes, &MPI_UNIT_VECTOR);
-  MPI_Type_commit(&MPI_UNIT_VECTOR);
-  
-  // const int bNumItems = 2;
-  // int bBlockLengths[2] = {
-  //   1,
-  //   1
-  // };
-  // MPI_Datatype bTypes[2] = {
-  //   MPI_INT,
-  //   MPI_FLOAT
-  // };
-  // MPI_Datatype MPI_BIN;
-  // MPI_Aint bOffsets[2] = {
-  //   offsetof(Bin, offset),
-  //   offsetof(UnitVector, theta)
-  // };
-  // MPI_Type_create_struct(bNumItems, bBlockLengths, bOffsets, bTypes, &MPI_BIN);
-  // MPI_Type_commit(&MPI_UNIT_VECTOR);
-
-  if (rank == 0) {
-    bool debug = false;
-    numThreads = 4;
-    numBins = 100000;
-    numPoints = 1000000;
-    time_t seed = time(NULL);
-    if (debug) {
-      seed = 123456789;
-    }
-    else {
-      if ((argc > 5) || (3 > argc)) {
-        printf("Need 2, 3, or 4 arguments:\nBins\nPoints\nThreads (optional)\nSeed (optional)\n");
-        printf("argc: %d\n", argc);
-        return 1;
-      }
-      numBins = atoi(argv[1]);
-      numPoints = atoi(argv[2]);
-      if (3 < argc) {
-        numThreads = atoi(argv[3]);
-      }
-      if (4 < argc) {
-        seed = atoi(argv[4]);
-      }
-    }
-
-    printf("Bins: %d\n", numBins);
-    printf("Points: %d\n", numPoints);
-    printf("Nodes: %d\n", size);
-    printf("Number of Threads: %d\n", numThreads);
-    printf("Seed: %d\n", seed);
-    srand(seed);
-  }
-
-  MPI_Bcast(&numBins, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&numThreads, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-  omp_set_dynamic(0);
-  omp_set_num_threads(numThreads);
-
-  if (rank == 0) {
-    startGenPoints = MPI_Wtime();
-    
-    localPoints = (UnitVector *) malloc(numPoints * sizeof(UnitVector));
-    if (localPoints == NULL) {
-      printf("Error allocating memory for the array of points\n");
-      return 1;
-    }
-
-    float x;
-    float y;
-    float z;
-    float mag;
-
-    // Generate Points
-    UnitVector *p = NULL;
-    int pointCounter = 0;
-    while (pointCounter < numPoints) {
-      x = randomFloatMinMax(-1, 1);
-      y = randomFloatMinMax(-1, 1);
-      z = randomFloatMinMax(-1, 1);
-      mag = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-      if ((0 < mag) && (mag < 1)) { // skip if all random numbers are 0 or if the random point is outside of the unit sphere
-        p = &localPoints[pointCounter];
-        p->x = x / mag;
-        p->y = y / mag;
-        p->z = z / mag;
-        generateUnitVectorFromCartesian(p);
-        pointCounter++;
-      }
-    }
-
-    int maxLocalNumPoints = ceil((float) numPoints / (float) size);
-    printf("maxLocalNumPoints: %d\n", maxLocalNumPoints);
-    int destination;
-    for (destination = 1; destination < size; destination++) {
-      localNumPoints = (int) fmin(numPoints - (destination * maxLocalNumPoints), maxLocalNumPoints);
-      MPI_Send(&localNumPoints, 1, MPI_INT, destination, 0, MPI_COMM_WORLD);
-    }
-    localNumPoints = maxLocalNumPoints;
-    for (destination = 1; destination < size; destination++) {
-      MPI_Send(localPoints + (destination * maxLocalNumPoints), (int) fmin(numPoints - (destination * maxLocalNumPoints), maxLocalNumPoints), MPI_UNIT_VECTOR, destination, 0, MPI_COMM_WORLD);
-    }
+  bool debug = false;
+  int numThreads = 4;
+  int numBins = 100000;
+  int numPoints = 1000000;
+  time_t seed = time(NULL);
+  if (debug) {
+    seed = 123456789;
   }
   else {
-    MPI_Recv(&localNumPoints, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-    localPoints = (UnitVector *) malloc(localNumPoints * sizeof(UnitVector));
-    if (localPoints == NULL) {
-      printf("error allocating memory for rank: %d\n", rank);
-    }
-    MPI_Recv(localPoints, localNumPoints, MPI_UNIT_VECTOR, 0, 0, MPI_COMM_WORLD, &status);
-  }
-  if (rank == 0) {
-    endGenPoints = MPI_Wtime();
-    startGenMaps = MPI_Wtime();
-  }
-    
-  float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
-  float exactCircumference = 2.0 * PI * radius;
-  circumference = ceil(exactCircumference);
-  maps = (Bin **) malloc(circumference * sizeof(Bin *));
-  for (int mapCounter = 0; mapCounter < circumference; mapCounter++) {
-    maps[mapCounter] = (Bin *) malloc((circumference - mapCounter) * sizeof(Bin));
-    if (maps[mapCounter] == NULL) {
-      printf("Error allocating memory for map with circumference %d\n", circumference - mapCounter);
+    if ((argc > 5) || (3 > argc)) {
+      printf("Need 2, 3, or 4 arguments:\nBins\nPoints\nThreads (optional)\nSeed (optional)\n");
       return 1;
+    }
+    numBins = atoi(argv[1]);
+    numPoints = atoi(argv[2]);
+    if (3 < argc) {
+      numThreads = atoi(argv[3]);
+    }
+    if (4 < argc) {
+      seed = atoi(argv[4]);
     }
   }
 
+
+  printf("Bins: %d\n", numBins);
+  printf("Points: %d\n", numPoints);
+  printf("Seed: %d\n", seed);
+  printf("Number of Threads: %i\n", numThreads);
+  srand(seed);
+  // omp_set_num_threads(numThreads);
+
+  struct timeval startGenPoints;
+  struct timeval endGenPoints;
+  gettimeofday(&startGenPoints, NULL);
+
+  UnitVector *points;
+  points = (UnitVector *) malloc(numPoints * sizeof(UnitVector));
+  if (points == NULL) {
+    printf("Error allocating memory for the array of points\n");
+    return 1;
+  }
+
+  float x;
+  float y;
+  float z;
+  float mag;
+
+  // Generate Points
+  UnitVector *p = NULL;
+  int pointCounter = 0;
+  while (pointCounter < numPoints) {
+    x = randomFloatMinMax(-1, 1);
+    y = randomFloatMinMax(-1, 1);
+    z = randomFloatMinMax(-1, 1);
+    mag = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+    if ((0 < mag) && (mag < 1)) { // skip if all random numbers are 0 or if the random point is outside of the unit sphere
+      p = &points[pointCounter];
+      p->x = x / mag;
+      p->y = y / mag;
+      p->z = z / mag;
+      generateUnitVectorFromCartesian(p);
+      pointCounter++;
+    }
+  }
+
+  gettimeofday(&endGenPoints, NULL);
+  struct timeval startGenMaps;
+  struct timeval endGenMaps;
+  gettimeofday(&startGenMaps, NULL);
+
+  float radius = pow((3 * numBins) / (4 * PI), 1.0 / 3.0);
+  float exactCircumference = 2.0 * PI * radius;
+  int circumference = ceil(exactCircumference);
+
   // Generate Unsorted Maps
+  Bin **maps; 
+  maps = (Bin **) calloc(circumference, sizeof(Bin *));
+  if (maps == NULL) {
+    printf("Error allocating memory for the maps\n");
+    return 1;
+  }
+  maps[0] = (Bin *) malloc(circumference * sizeof(Bin));
+  if (maps[0] == NULL) {
+    printf("Error allocating memory for map with circumference %d\n", circumference);
+    return 1;
+  }
   Bin *map = maps[0];
   Bin *bin = NULL;
-  for (int binCounter = 0; binCounter < circumference; binCounter++) {
+  int binCounter;
+  for (binCounter = 0; binCounter < circumference; binCounter++) {
     bin = &map[binCounter];
     bin->theta = fmod(GA * binCounter, PI * 2.0); // [0, 2PI] only positive because we either add or subtract offsets
     bin->offset = binCounter;
   }
-  for (int mapCounter = 1; mapCounter < circumference; mapCounter++) {
+  int mapCounter;
+  for (mapCounter = 1; mapCounter < circumference; mapCounter++) {
+    maps[mapCounter] = (Bin *) malloc((circumference - mapCounter) * sizeof(Bin));
     if (maps[mapCounter] == NULL) {
       printf("Error allocating memory for map with circumference %d\n", circumference - mapCounter);
       return 1;
     }
     memcpy(maps[mapCounter], maps[mapCounter - 1], (circumference - mapCounter) * sizeof(Bin));
   }
-    
+  
   // Sort Maps
-  int mapCounter;
-  #pragma omp parallel num_threads(numThreads)
+  #pragma acc parallel 
   {
-    #pragma omp for
+    #pragma acc loop
     for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
       mergeSort(maps[mapCounter], circumference - mapCounter);
     }
   }
-
-  if (rank == 0) {
-    endGenMaps = MPI_Wtime();
-    startBinPoints = MPI_Wtime();
-  }
+  
+  gettimeofday(&endGenMaps, NULL);
+  struct timeval startBinPoints;
+  struct timeval endBinPoints;
+  gettimeofday(&startBinPoints, NULL);
 
   // Bin Points
-
   int *results = (int *) calloc(numBins, sizeof(int));
   if (results == NULL) {
     printf("Error allocating memory for results\n");
@@ -257,7 +168,8 @@ int main(int argc, char **argv) {
   }
   int numPotentials = 4;
   int badPoints = 0;
-  #pragma omp parallel num_threads(numThreads)
+
+  #pragma acc parallel
   {
     int localCircumference;
     int mapIndex;
@@ -275,10 +187,9 @@ int main(int argc, char **argv) {
     if (potentials == NULL) {
       printf("Error allocating memory for potentials\n");
     }
-    UnitVector *p;
-    #pragma omp for reduction (+ : badPoints)
-    for (int pointCounter = 0; pointCounter < localNumPoints; pointCounter++) {
-      p = &localPoints[pointCounter];
+    #pragma acc loop reduction (+ : badPoints)
+    for (pointCounter = 0; pointCounter < numPoints; pointCounter++) {
+      p = &points[pointCounter];
       guessIndex = floor(numBins * (p->z + 1) / 2);
       generateUnitVectorFromIndex(&guess, guessIndex, numBins);
       localCircumference = ceil(exactCircumference * sqrt(pow(p->x, 2) + pow(p->y, 2)));
@@ -322,8 +233,10 @@ int main(int argc, char **argv) {
         }
       }
       if (found) {
-        #pragma omp atomic
-        results[bestPointIndex]++;
+        #pragma acc atomic capture
+        {
+          results[bestPointIndex]++;
+        }
       }
       else {
         badPoints++;
@@ -331,32 +244,20 @@ int main(int argc, char **argv) {
     }
     free(potentials);
   }
+
+  gettimeofday(&endBinPoints, NULL);
+
   if (badPoints > 0) {
-    printf("Rank: %d Bad Points:%d\n", rank, badPoints);
-  }
-
-  // if (rank == 0) {
-  //   for (int binCounter = 0; binCounter < numBins; binCounter++) {
-  //     printf("results[%d]: %d\n", binCounter, results[binCounter]);
-  //   }
-  // }
-
-  if (rank == 0) {
-    MPI_Reduce(MPI_IN_PLACE, results, numBins, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-  }
-  else {
-    MPI_Reduce(results, results, numBins, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-  }
-
-  if (rank == 0) {
-    endBinPoints = MPI_Wtime();
     printf("\n");
-    printf("Timing:\n");
-    printf("Point Generation: %f\n", (double)(endGenPoints - startGenPoints));
-    printf("Map Generation: %f\n", (double)(endGenMaps - startGenMaps));
-    printf("Point Binning: %f\n", (double)(endBinPoints - startBinPoints));
+    printf("Bad Points:%d\n", badPoints);
   }
-  
+
+  printf("\n");
+  printf("Timing:\n");
+  printf("Point Generation: %f\n", ((double)(1000000 * (endGenPoints.tv_sec - startGenPoints.tv_sec)) + (double)(endGenPoints.tv_usec - startGenPoints.tv_usec)) / (double)1000000);
+  printf("Map Generation: %f\n", ((double)(1000000 * (endGenMaps.tv_sec - startGenMaps.tv_sec)) + (double)(endGenMaps.tv_usec - startGenMaps.tv_usec)) / (double)1000000);
+  printf("Point Binning: %f\n", ((double)(1000000 * (endBinPoints.tv_sec - startBinPoints.tv_sec)) + (double)(endBinPoints.tv_usec - startBinPoints.tv_usec)) / (double)1000000);
+
   // printf("\n");
   // printf("Results:\n");
   // for (binCounter = 0; binCounter < numBins; binCounter++) {
@@ -365,13 +266,11 @@ int main(int argc, char **argv) {
 
   // Clean Up
   free(results);
-  for (int mapCounter = 0; mapCounter < circumference; mapCounter++) {
+  for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
     free(maps[mapCounter]);
   }
   free(maps);
-
-  free(localPoints);
-  MPI_Finalize();
+  free(points);
   return 0;
 }
 
