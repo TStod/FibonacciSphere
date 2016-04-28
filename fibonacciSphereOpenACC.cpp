@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <string.h>
+#include <float.h>
 #include <openacc.h>
 
 #define PI 3.14159265358979323846
@@ -43,7 +44,6 @@ float distanceBetween(UnitVector *p1, UnitVector *p2);
 // arg[3]: seed (optional)
 int main(int argc, char **argv) {
   bool debug = false;
-  int numThreads = 4;
   int numBins = 100000;
   int numPoints = 1000000;
   time_t seed = time(NULL);
@@ -52,16 +52,13 @@ int main(int argc, char **argv) {
   }
   else {
     if ((argc > 5) || (3 > argc)) {
-      printf("Need 2, 3, or 4 arguments:\nBins\nPoints\nThreads (optional)\nSeed (optional)\n");
+      printf("Need 2 or 3 arguments:\nBins\nPoints\nSeed (optional)\n");
       return 1;
     }
     numBins = atoi(argv[1]);
     numPoints = atoi(argv[2]);
     if (3 < argc) {
-      numThreads = atoi(argv[3]);
-    }
-    if (4 < argc) {
-      seed = atoi(argv[4]);
+      seed = atoi(argv[3]);
     }
   }
 
@@ -69,9 +66,7 @@ int main(int argc, char **argv) {
   printf("Bins: %d\n", numBins);
   printf("Points: %d\n", numPoints);
   printf("Seed: %d\n", seed);
-  printf("Number of Threads: %i\n", numThreads);
   srand(seed);
-  // omp_set_num_threads(numThreads);
 
   struct timeval startGenPoints;
   struct timeval endGenPoints;
@@ -147,7 +142,7 @@ int main(int argc, char **argv) {
   }
   
   // Sort Maps
-  #pragma acc parallel 
+  #pragma acc parallel
   {
     #pragma acc loop
     for (mapCounter = 0; mapCounter < circumference; mapCounter++) {
@@ -183,12 +178,12 @@ int main(int argc, char **argv) {
     UnitVector testPoint;
     bool found;
     int guessCounter;
-    int *potentials = (int*) malloc(numPotentials * sizeof(int));
-    if (potentials == NULL) {
-      printf("Error allocating memory for potentials\n");
-    }
     #pragma acc loop reduction (+ : badPoints)
     for (pointCounter = 0; pointCounter < numPoints; pointCounter++) {
+      int *potentials = (int*) malloc(numPotentials * sizeof(int));
+      // if (potentials == NULL) {
+      //   printf("Error allocating memory for potentials\n");
+      // }
       p = &points[pointCounter];
       guessIndex = floor(numBins * (p->z + 1) / 2);
       generateUnitVectorFromIndex(&guess, guessIndex, numBins);
@@ -213,22 +208,16 @@ int main(int argc, char **argv) {
       potentials[3] = getOffsetAfter(maps[mapIndex], localCircumference, upperThetaOffset);
       
       found = false;
+      bestDistance = FLT_MAX;
       for (guessCounter = 0; guessCounter < numPotentials; guessCounter++) {
         potentials[guessCounter] *= pow(-1, (guessCounter / 2) + 1);
         potentials[guessCounter] += guessIndex;
         if ((0 <= potentials[guessCounter]) && (potentials[guessCounter] < numBins)) {
           generateUnitVectorFromIndex(&testPoint, potentials[guessCounter], numBins);
-          if (!found) {
+          testDistance = distanceBetween(&testPoint, p);
+          if (testDistance < bestDistance) {
             bestPointIndex = potentials[guessCounter];
-            bestDistance = distanceBetween(&testPoint, p);
-            found = true;
-          }
-          else {
-            testDistance = distanceBetween(&testPoint, p);
-            if (testDistance < bestDistance) {
-              bestPointIndex = potentials[guessCounter];
-              bestDistance = testDistance;
-            }
+            bestDistance = testDistance;
           }
         }
       }
@@ -241,8 +230,8 @@ int main(int argc, char **argv) {
       else {
         badPoints++;
       }
+      free(potentials);
     }
-    free(potentials);
   }
 
   gettimeofday(&endBinPoints, NULL);
@@ -287,7 +276,7 @@ float randomFloatMinMax(float min, float max) {
 };
 
 int getOffsetAfter(Bin *map, int length, float theta) {
-  int offset = -1;
+  int offset = 0;
   int binCounter;
   for (binCounter = 0; binCounter < length; binCounter++) {
     if (theta < map[binCounter].theta) {
@@ -298,7 +287,7 @@ int getOffsetAfter(Bin *map, int length, float theta) {
 }
 
 int getOffsetBefore(Bin *map, int length, float theta) {
-  int offset = -1;
+  int offset = 0;
   int binCounter;
   for (binCounter = length - 1; binCounter >= 0; binCounter--) {
     if (theta > map[binCounter].theta) {

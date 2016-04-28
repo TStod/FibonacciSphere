@@ -6,8 +6,8 @@
 #BSUB -q par-gpu-2
 #BSUB -R "span[ptile=32]"
 #BSUB cwd /home/stoddard.t/FibonacciSphere/
+
 work=/home/stoddard.t/FibonacciSphere/
 
 cd $work
-
-bin/fibonacciSphereOpenACC 1000000 10000000 4 123456789
+bin/fibonacciSphereOpenACC 1000000 10000000 123456789
