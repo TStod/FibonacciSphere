@@ -3,6 +3,8 @@ My project for High Performance Computing at Northeastern University
 
 In this project, I wrote an algorithm to calculate the nearest point on a Fibonacci Lattice Sphere. I then explored various methods of parallelizing it using OpenMP, MPI, and OpenACC. Using maps and some trigonometric calculations I wrote an elegant algorithm and achieved constant runtime regardless of the number of points on the lattice (excluding setup costs). I then explored divide and conquer techniques along with other structural algorithm modifications to parallelize batch processing of randomly generated points with the goal of minimum runtime.
 
+![Fibonacci Lattice Sphere](./FibonacciSphere.png)
+
 ### Sequential
 
 Compiled with g++ on the Discovery Cluster
